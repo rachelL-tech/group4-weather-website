@@ -1,13 +1,13 @@
 // Card 1
 import { getIcon } from './icons.js'; // 引入函式
 
-export function renderHourlyForecast(hoursData, selector = '.hourly-forecast') {
+export function renderHourlyForecast(hoursData = [], selector = '.hourly-forecast') {
   const container = document.querySelector(selector);
 
   if (!container) return;
 
   // 假資料 (以後從 API 抓)
-  // const hoursData = [
+  // hoursData = [
   //   { time: '現在', temp: '23°C', type: 'rainy' },
   //   { time: '00', temp: '21°C', type: 'rainy' },
   //   { time: '01', temp: '20°C', type: 'thunder' },

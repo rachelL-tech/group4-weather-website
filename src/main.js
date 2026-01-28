@@ -21,8 +21,8 @@ if (homePageBtn) {
 
 // const now_Data = await getNow10MinRenderData("臺北市");
 
-// const card1_Data = await getCard1RenderData("臺北市");
-// renderHourlyForecast(card1_Data);
+const card1_Data = await getCard1RenderData("臺北市");
+renderHourlyForecast(card1_Data);
 
 const card2_Data = await getCard2RenderData("臺北市");
 renderDailySummary(card2_Data);
