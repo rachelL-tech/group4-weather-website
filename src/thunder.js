@@ -68,6 +68,7 @@ function initLightning(canvas) {
             drawStrike();
         }
 
+        // 設定 thunderRequest (就不會是 null 了)
         thunderRequest = requestAnimationFrame(animate);
     }
 

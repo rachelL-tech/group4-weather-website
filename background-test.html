@@ -17,7 +17,19 @@
         <canvas id="lightning-canvas"></canvas>
     </div>
     <div class="tsparticles" id="tsparticles-rain"></div>
-    <div class="tsparticles" id="tsparticles-clouds"></div>
     <div class="tsparticles" id="tsparticles-stars"></div>
+    <div class="tsparticles" id="tsparticles-clouds"></div>
+    <!-- 測試用的按鈕 -->
+    <div id="dev-weather-console">
+        <h4>天氣模擬器 🌦️</h4>
+        <div class="btn-group">
+            <button onclick="WeatherManager.update('晴')">純晴天</button>
+            <button onclick="WeatherManager.update('多雲')">多雲</button>
+            <button onclick="WeatherManager.update('陰有雨')">陰雨天</button>
+            <button onclick="WeatherManager.update('晴有雨')">太陽雨</button>
+            <button onclick="WeatherManager.update('陰有雷陣雨')">暴風雨</button>
+        </div>
+        <p><small>目前判斷：<span id="time-status"></span></small></p>
+    </div>
 </body>
 </html>
