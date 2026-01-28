@@ -1,6 +1,37 @@
 const BASE_URL = "https://opendata.cwa.gov.tw/api/v1/rest/datastore";
 const AUTH = "rdec-key-123-45678-011121314";
 
+// ==============================
+// 全台縣市 → 代表觀測站（O-A0003-001）
+// ==============================
+const CITY_TO_STATION = {
+  "臺北市": "466920",
+  "新北市": "466880",
+  "桃園市": "467050",
+  "臺中市": "467490",
+  "臺南市": "467410",
+  "高雄市": "467440",
+
+  "基隆市": "466940",
+  "新竹市": "467571",
+  "新竹縣": "467571",
+  "苗栗縣": "467300",
+  "彰化縣": "467270",
+  "南投縣": "467650",
+  "雲林縣": "467530",
+  "嘉義市": "467480",
+  "嘉義縣": "467480",
+  "屏東縣": "467590",
+  "宜蘭縣": "467080",
+  "花蓮縣": "466990",
+  "臺東縣": "467660",
+
+  "澎湖縣": "467350",
+  "金門縣": "467110",
+  "連江縣": "467990",
+};
+
+
 function ok(renderData) {
   return { ok: true, renderData };
 }
@@ -117,6 +148,332 @@ export async function getCard2RenderData(city) {
       chanceOfRain: chanceOfRain != null ? String(chanceOfRain) : "--",
     });
   } catch (e) {
+    return fail();
+  }
+}
+
+// ==============================
+// forecast：7日預報（縣市）
+// 使用 F-D0047-091
+// ==============================
+
+// 只留 forecast 會用到的工具
+function findElByNames(arr, names) {
+  for (const n of names) {
+    const hit = arr?.find((e) => e.elementName === n);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+function wxToIcon(wxText = "") {
+  const t = String(wxText);
+  if (t.includes("雷") || t.includes("雨") || t.includes("陣雨")) return "Rainy";
+  if (t.includes("雪")) return "Rainy";
+  if (t.includes("陰") || t.includes("多雲") || t.includes("雲")) return "Cloudy";
+  if (t.includes("晴")) return "Sunny";
+  return "Cloudy";
+}
+
+// 日期工具（支援 "2026-01-28 12:00:00"）
+function toDateObj(text) {
+  return new Date(String(text).replace(" ", "T"));
+}
+function dateKey(text) {
+  const d = toDateObj(text);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function mdLabel(text) {
+  const d = toDateObj(text);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+function weekdayZh(text) {
+  const d = toDateObj(text);
+  const map = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+  return map[d.getDay()];
+}
+function mode(arr) {
+  const map = new Map();
+  let best = null;
+  let bestCount = 0;
+  for (const x of arr) {
+    if (!x) continue;
+    const c = (map.get(x) ?? 0) + 1;
+    map.set(x, c);
+    if (c > bestCount) {
+      bestCount = c;
+      best = x;
+    }
+  }
+  return best;
+}
+
+// ✅ 縣市版：用 city 找對應的 location
+function pickForecastLocation(raw, city) {
+  const list = raw?.records?.locations?.[0]?.location ?? [];
+  return list.find((l) => l.locationName === city) ?? null;
+}
+
+// ==============================
+// 主函式：7 日預報
+// ==============================
+export async function getForecastRenderData(city) {
+  try {
+    const raw = await fetchCWA("F-D0047-091", { locationName: city });
+
+    // ✅ 091 實際路徑：records.Locations[0].Location
+    const loc =
+      raw?.records?.Locations?.[0]?.Location?.find((l) => l.LocationName === city);
+
+    if (!loc) throw new Error("city not found");
+
+    const we = loc.WeatherElement ?? [];
+
+    // ✅ 091 實際 ElementName（中文）
+    const wxEl = we.find((e) => e.ElementName === "天氣現象");
+    const maxTEl = we.find((e) => e.ElementName === "最高溫度");
+    const minTEl = we.find((e) => e.ElementName === "最低溫度");
+    const popEl = we.find((e) => e.ElementName === "降雨機率");
+    const wsEl  = we.find((e) => e.ElementName === "風速"); // WindSpeed :contentReference[oaicite:2]{index=2}
+
+    if (!wxEl?.Time?.length) throw new Error("Wx missing");
+
+    // 用 Wx 建立每日 bucket
+    const days = new Map();
+
+    for (const t of wxEl.Time) {
+      const dk = dateKey(t.StartTime);
+      if (!days.has(dk)) {
+        days.set(dk, {
+          weekday: weekdayZh(t.StartTime),
+          md: mdLabel(t.StartTime),
+          wxList: [],
+          maxList: [],
+          minList: [],
+          popList: [],
+          wsList: [],
+        });
+      }
+      const wxText = t.ElementValue?.[0]?.Weather ?? "";
+      days.get(dk).wxList.push(wxText);
+    }
+
+    // 把數值型資料灌進每日 bucket
+    function collect(el, listName, valueKey) {
+      if (!el?.Time?.length) return;
+      for (const t of el.Time) {
+        const dk = dateKey(t.StartTime);
+        if (!days.has(dk)) continue;
+        const v = safeNum(t.ElementValue?.[0]?.[valueKey]);
+        if (v == null) continue;
+        days.get(dk)[listName].push(v);
+      }
+    }
+
+    collect(maxTEl, "maxList", "MaxTemperature");
+    collect(minTEl, "minList", "MinTemperature");
+    collect(popEl,  "popList", "ProbabilityOfPrecipitation");
+    collect(wsEl,   "wsList",  "WindSpeed"); // :contentReference[oaicite:3]{index=3}
+
+    // 取前 7 天
+    const sortedDays = Array.from(days.entries())
+      .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+      .slice(0, 7)
+      .map(([, v]) => v);
+
+    // 組成 renderData（✅符合你指定格式）
+    const renderData = {};
+    for (const d of sortedDays) {
+      const wxText = mode(d.wxList) ?? d.wxList.find(Boolean) ?? "";
+      const icon = wxToIcon(wxText);
+
+      const maxT = d.maxList.length ? Math.max(...d.maxList) : null;
+      const minT = d.minList.length ? Math.min(...d.minList) : null;
+      const pop  = d.popList.length ? Math.max(...d.popList) : null;
+      const ws   = d.wsList.length
+        ? Math.round((d.wsList.reduce((s, x) => s + x, 0) / d.wsList.length) * 10) / 10
+        : null;
+
+      renderData[d.weekday] = [
+        d.md,
+        icon,
+        wxText,
+        { 最高溫: maxT ?? "--", 最低溫: minT ?? "--" },
+        { 降雨機率: pop ?? "--" },
+        { 風速: ws ?? "--" },
+      ];
+    }
+
+    return ok(renderData);
+  } catch (e) {
+    console.error("forecast error:", e);
+    return fail();
+  }
+}
+
+
+// ==============================
+// card 1 輔助工具
+// ==============================
+function pickBestPoint(timeArr, targetMs) {
+  let best = null;
+  let bestMs = Infinity;
+
+  for (const t of timeArr ?? []) {
+    const ms = new Date(t.startTime).getTime();
+    if (ms >= targetMs && ms < bestMs) {
+      bestMs = ms;
+      best = t;
+    }
+  }
+  return best; // 可能為 null
+}
+
+// 輔助：用縣市取得「現在觀測溫度」（10 分鐘）
+async function getNowTempByCity(city) {
+  const stationId = CITY_TO_STATION[city];
+  if (!stationId) return null;
+
+  const raw = await fetchCWA("O-A0003-001");
+  const stations = raw?.records?.Station ?? raw?.records?.station ?? [];
+
+  const station = stations.find(
+    s => (s?.Station?.StationId ?? s?.StationId) === stationId
+  );
+  if (!station) return null;
+
+  const we = station?.WeatherElement ?? station?.weatherElement ?? [];
+  const tempVal = we.find(e => e.elementName === "TEMP")?.elementValue;
+
+  return safeNum(tempVal);
+}
+
+// ==============================
+// card 1 主函式
+// ==============================
+export async function getCard1RenderData(city) {
+  try {
+    const raw = await fetchCWA("F-D0047-089", { locationName: city });
+
+    // ✅ 正確路徑（注意大小寫）
+    const loc =
+      raw?.records?.Locations?.[0]?.Location?.find(l => l.LocationName === city);
+
+    if (!loc) throw new Error("location not found");
+
+    const we = loc.WeatherElement ?? [];
+
+    // ✅ 089 使用中文 ElementName
+    const tEl = we.find(e => e.ElementName === "溫度");
+    const wxEl = we.find(e => e.ElementName === "天氣現象");
+
+    if (!tEl?.Time?.length) throw new Error("no temperature data");
+
+    // 對齊整點
+    const base = new Date();
+    base.setMinutes(0, 0, 0);
+
+    const renderData = {};
+    let nowTempFromForecast = null;
+
+    // 取 DataTime 或 StartTime
+    const getTimeMs = (t) =>
+      new Date(t.DataTime ?? t.StartTime).getTime();
+
+    const pickBestPoint089 = (arr, targetMs) => {
+      let best = null;
+      let bestMs = Infinity;
+      for (const t of arr ?? []) {
+        const ms = getTimeMs(t);
+        if (ms >= targetMs && ms < bestMs) {
+          bestMs = ms;
+          best = t;
+        }
+      }
+      return best;
+    };
+
+    for (let i = 0; i <= 5; i++) {
+      const target = new Date(base.getTime() + i * 60 * 60 * 1000);
+      const targetMs = target.getTime();
+
+      const tPoint = pickBestPoint089(tEl.Time, targetMs);
+      const wxPoint = wxEl ? pickBestPoint089(wxEl.Time, targetMs) : null;
+
+      const temp = safeNum(
+        tPoint?.ElementValue?.[0]?.Temperature
+      );
+
+      const wxText =
+        wxPoint?.ElementValue?.[0]?.Weather ?? "";
+
+      const icon = wxToIcon(wxText);
+
+      const key = i === 0
+        ? "now"
+        : String(target.getHours()).padStart(2, "0");
+
+      renderData[key] = [icon, temp != null ? String(temp) : "--"];
+
+      if (i === 0) nowTempFromForecast = temp;
+    }
+
+    // 23 點後補 10 分鐘觀測
+    if (nowTempFromForecast === null) {
+      const obsTemp = await getNowTempByCity(city);
+      if (obsTemp !== null) {
+        const keepIcon = renderData.now?.[0] ?? "Cloudy";
+        renderData.now = [keepIcon, String(obsTemp)];
+      }
+    }
+
+    return ok(renderData);
+  } catch (err) {
+    console.error("card1 error:", err);
+    return fail();
+  }
+}
+
+
+// ==============================
+// 10 分鐘觀測（O-A0003-001）
+// 回傳原始 weather 字串（不轉 icon）
+// ==============================
+export async function getNow10MinRenderData(city) {
+  try {
+    // 1️⃣ 由縣市找到代表觀測站
+    const stationId = CITY_TO_STATION[city];
+    if (!stationId) throw new Error("No station mapping");
+
+    // 2️⃣ 抓 10 分鐘觀測資料
+    const raw = await fetchCWA("O-A0003-001");
+    const stations = raw?.records?.Station ?? raw?.records?.station ?? [];
+    if (!Array.isArray(stations)) throw new Error("No station data");
+
+    // 3️⃣ 找到對應 StationId
+    const station = stations.find(
+      s => (s?.Station?.StationId ?? s?.StationId) === stationId
+    );
+    if (!station) throw new Error("Station not found");
+
+    // 4️⃣ 取 TEMP 與 Weather（原字串）
+    const we = station?.WeatherElement ?? station?.weatherElement ?? [];
+
+    const tempVal = we.find(e => e.elementName === "TEMP")?.elementValue;
+    const weatherText = we.find(e => e.elementName === "Weather")?.elementValue;
+
+    const T = safeNum(tempVal);
+
+    return {
+      ok: true,
+      renderData: {
+        T: T !== null ? String(Math.round(T)) : "--"
+      },
+      UIData: {
+        weather: weatherText ?? ""
+      }
+    };
+  } catch (err) {
     return fail();
   }
 }

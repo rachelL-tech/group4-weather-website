@@ -1,6 +1,6 @@
 // 引入渲染工具
 import { renderHourlyForecast, renderDailySummary } from './render.js';
-import { getCard2RenderData } from './api.js';
+import { getCard1RenderData, getCard2RenderData, getNow10MinRenderData,} from './api.js';
 
 // 跳轉頁面
 
@@ -19,7 +19,10 @@ if (homePageBtn) {
   });
 }
 
-renderHourlyForecast();
+// const now_Data = await getNow10MinRenderData("臺北市");
 
-const card2_Data = await getCard2RenderData();
+// const card1_Data = await getCard1RenderData("臺北市");
+// renderHourlyForecast(card1_Data);
+
+const card2_Data = await getCard2RenderData("臺北市");
 renderDailySummary(card2_Data);
