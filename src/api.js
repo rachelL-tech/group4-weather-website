@@ -83,7 +83,7 @@ function safeNum(v) {
   return Number.isFinite(n) ? n : null;
 }
 
-export async function getCard2RenderData(city) {
+export async function getCard2RenderData(city = "臺北市") {
   try {
     const raw = await fetchCWA("F-C0032-001", { locationName: city });
 
@@ -217,7 +217,7 @@ function pickForecastLocation(raw, city) {
 // ==============================
 // 主函式：7 日預報
 // ==============================
-export async function getForecastRenderData(city) {
+export async function getForecastRenderData(city = "臺北市") {
   try {
     const raw = await fetchCWA("F-D0047-091", { locationName: city });
 
@@ -329,29 +329,33 @@ function pickBestPoint(timeArr, targetMs) {
   return best; // 可能為 null
 }
 
-// 輔助：用縣市取得「現在觀測溫度」（10 分鐘）
+function safeNumObs(v) {
+  const n = safeNum(v);
+  if (n === null) return null;
+  // O-A0003-001 無資料常見值
+  if (n <= -90) return null;
+  return n;
+}
+
+// 用縣市取得「現在觀測溫度」（10 分鐘）
 async function getNowTempByCity(city) {
   const stationId = CITY_TO_STATION[city];
   if (!stationId) return null;
 
   const raw = await fetchCWA("O-A0003-001");
-  const stations = raw?.records?.Station ?? raw?.records?.station ?? [];
+  const stations = raw?.records?.Station ?? [];
+  const st = stations.find(s => s?.StationId === stationId);
+  if (!st) return null;
 
-  const station = stations.find(
-    s => (s?.Station?.StationId ?? s?.StationId) === stationId
-  );
-  if (!station) return null;
-
-  const we = station?.WeatherElement ?? station?.weatherElement ?? [];
-  const tempVal = we.find(e => e.elementName === "TEMP")?.elementValue;
-
-  return safeNum(tempVal);
+  // 001：WeatherElement 是 object，不是 array
+  const we = st?.WeatherElement ?? {};
+  return safeNumObs(we?.AirTemperature);
 }
 
 // ==============================
 // card 1 主函式
 // ==============================
-export async function getCard1RenderData(city) {
+export async function getCard1RenderData(city = "臺北市") {
   try {
     const raw = await fetchCWA("F-D0047-089", { locationName: city });
 
@@ -439,41 +443,36 @@ export async function getCard1RenderData(city) {
 // 10 分鐘觀測（O-A0003-001）
 // 回傳原始 weather 字串（不轉 icon）
 // ==============================
-export async function getNow10MinRenderData(city) {
+export async function getNow10MinRenderData(city = "臺北市") {
   try {
-    // 1️⃣ 由縣市找到代表觀測站
     const stationId = CITY_TO_STATION[city];
     if (!stationId) throw new Error("No station mapping");
 
-    // 2️⃣ 抓 10 分鐘觀測資料
     const raw = await fetchCWA("O-A0003-001");
-    const stations = raw?.records?.Station ?? raw?.records?.station ?? [];
-    if (!Array.isArray(stations)) throw new Error("No station data");
+    const stations = raw?.records?.Station ?? [];
+    const st = stations.find(s => s?.StationId === stationId);
+    if (!st) throw new Error("Station not found");
 
-    // 3️⃣ 找到對應 StationId
-    const station = stations.find(
-      s => (s?.Station?.StationId ?? s?.StationId) === stationId
-    );
-    if (!station) throw new Error("Station not found");
+    const we = st?.WeatherElement ?? {};
 
-    // 4️⃣ 取 TEMP 與 Weather（原字串）
-    const we = station?.WeatherElement ?? station?.weatherElement ?? [];
-
-    const tempVal = we.find(e => e.elementName === "TEMP")?.elementValue;
-    const weatherText = we.find(e => e.elementName === "Weather")?.elementValue;
-
-    const T = safeNum(tempVal);
+    const T = safeNumObs(we?.AirTemperature);
+    const weatherText = we?.Weather ?? "";
 
     return {
       ok: true,
       renderData: {
-        T: T !== null ? String(Math.round(T)) : "--"
+        T: T != null ? String(Math.round(T)) : "--"
       },
       UIData: {
-        weather: weatherText ?? ""
+        weather: weatherText
       }
     };
   } catch (err) {
-    return fail();
+    return {
+      ok: false,
+      error: {
+        message: "無法連線到氣象資料服務，請稍後再試。"
+      }
+    };
   }
 }
