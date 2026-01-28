@@ -1,8 +1,15 @@
-/* Common dropdown styles */
+.location_container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/** dropdown **/
 .dropdown {
     position: relative;
     display: inline-block;
     margin-left: 10px;
+    margin-top: 20px;
 }
 
 .dropdown-toggle {
@@ -105,4 +112,22 @@
 .dropdown .dropdown-item:hover {
     background-color: #333;
     color: #ff7e5f;
+}
+
+/** focus **/
+.focus {
+  margin-top: 20px;
+  width: 50px ;
+  height: 50px ;
+  border: none;
+  background: transparent;
+  background-image: url("/design/icons/focus.png");
+  background-size: cover; /* 按比例放大並裁切圖片以填滿容器 */
+  background-position: center top; /* 以中央對齊裁切 */
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
+}
+
+.focus:hover {
+  transform: rotate(90deg);
 }
