@@ -1,3 +1,5 @@
+//! 這個是給模擬器專用的檔案～
+
 /**
  * 控制粒子層的開關
  * @param {string} id - HTML 元素的 ID (例如 'tsparticles-rain')
@@ -280,16 +282,17 @@ const WeatherManager = {
     }
 };
 
-// // 在頁面載入後顯示目前是白天還是晚上
-// function updateTimeDisplay() {
-//     const status = document.getElementById("time-status");
-//     if (status) {
-//         status.innerText = isDayTime() ? "🌞 白天 (18:00前)" : "🌙 晚上 (18:00後)";
-//     }
-// }
-
-// 預設模式：晴
-function initDefalueBackground(Wx){
-    WeatherManager.update(Wx) 
+// 在頁面載入後顯示目前是白天還是晚上
+function updateTimeDisplay() {
+    const status = document.getElementById("time-status");
+    if (status) {
+        status.innerText = isDayTime() ? "🌞 白天 (18:00前)" : "🌙 晚上 (18:00後)";
+    }
 }
-initDefalueBackground("晴")//預設晴天
+
+// 初始執行一次
+function initSimulator(){
+    updateTimeDisplay();
+    WeatherManager.update("晴") //預設晴天
+}
+initSimulator()

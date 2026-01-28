@@ -49,10 +49,10 @@ body {
             rgb(247, 247, 247) 10%,
             rgba(247, 247, 247, 0.751) 15%,
             transparent 45%,
-            rgba(255, 0, 0, 0.4) 60%,
-            rgba(255, 255, 0, 0.4) 61%,
-            rgba(15, 245, 34, 0.4) 62%,
-            rgba(0, 255, 255, 0.4) 63%,
+            rgba(255, 0, 0, 0.5) 60%,
+            rgba(255, 255, 0, 0.5) 61%,
+            rgba(15, 245, 34, 0.5) 62%,
+            rgba(0, 255, 255, 0.5) 63%,
             rgba(247, 247, 247, 0.8) 67%,
             rgb(247, 247, 247) 70%,
             transparent 75%);
@@ -61,7 +61,7 @@ body {
     z-index: 0;
     pointer-events: none;
     /* 應用動畫 */
-    animation: pulse-glow 6s ease-in-out infinite;
+    animation: pulse-glow 8s ease-in-out infinite;
 
     /* 確保旋轉和縮放的中心點在光圈中心 */
     transform-origin: center center;
@@ -76,7 +76,19 @@ body {
         /* 初始透明度 */
     }
 
-    50% {
+    40% {
+        transform: scale(1.2);
+        /* 稍微放大一點點 */
+        opacity: 0.9;
+        /* 稍微變亮 */
+        /* 1. saturate: 讓彩虹色更鮮豔
+        2. contrast: 讓亮的中心更亮，暗的邊緣更乾淨
+        3. drop-shadow: 創造一層額外的白色光暈，這比亮度濾鏡更像真實的光
+        */
+        filter: blur(40px) saturate(1.8) contrast(1.2) drop-shadow(0 0 25px rgba(255, 255, 255, 0.5));
+    }
+
+    60% {
         transform: scale(1.2);
         /* 稍微放大一點點 */
         opacity: 0.9;
@@ -126,12 +138,12 @@ body {
 
 /* 陰天：沈穩的灰色漸層 */
 .state-gray {
-    background: linear-gradient(135deg, #3d3d3d 0%, #242424 100%);
+    background: linear-gradient(190deg, #7b7b7b 0%, #646464 70%, #292929 100%);
 }
 
 /* 晚上：深邃的夜空藍 */
 .state-night {
-    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    background: linear-gradient(135deg, #0f2027 0%, #182c33 70%, #244250 100%);
 }
 
 /*! 按鈕控制台的 CSS */
@@ -139,7 +151,7 @@ body {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
     padding: 15px;
     border-radius: 12px;
@@ -162,7 +174,7 @@ body {
 }
 
 #dev-weather-console button {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     border: 1px solid white;
     color: white;
     padding: 5px 10px;
@@ -175,4 +187,8 @@ body {
 #dev-weather-console button:hover {
     background: white;
     color: #333;
+}
+
+#dev-weather-console button:last-child{
+    margin-bottom: 8px;
 }

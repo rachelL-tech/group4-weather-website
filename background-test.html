@@ -6,7 +6,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tsparticles/all@3.1.0/tsparticles.all.bundle.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@3.1.0/tsparticles.bundle.min.js" defer></script>
     <script src="/src/thunder.js" defer></script>
-    <script src="/src/effects.js" defer></script>
+    <script src="/src/effects-demo.js" defer></script>
     <link rel="stylesheet" href="effect.css" />
     <title>背景測試</title>
 </head>
@@ -27,9 +27,9 @@
             <button onclick="WeatherManager.update('多雲')">多雲</button>
             <button onclick="WeatherManager.update('陰有雨')">陰雨天</button>
             <button onclick="WeatherManager.update('晴有雨')">太陽雨</button>
-            <button onclick="WeatherManager.update('陰有雷陣雨')">暴風雨</button>
+            <button onclick="WeatherManager.update('陰有雷陣雨')">雷雨</button>
         </div>
-        <p><small>目前判斷：<span id="time-status"></span></small></p>
+        <p><small>目前模式：<span id="time-status"></span></small></p>
     </div>
 </body>
 </html>
