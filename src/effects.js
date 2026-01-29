@@ -234,7 +234,8 @@ const WeatherManager = {
         // 雲量及天色判斷
         if (text.includes("陰") || text.includes("多雲")) {
             params.cloud = "cloudy";
-            if (isDay && !text.includes("晴")) params.sky = "gray"; 
+            // if (isDay && !text.includes("晴")) params.sky = "gray"; 
+            if (isDay && text.includes("陰")) params.sky = "gray"; // 改成只有陰天才是灰天空
         }
 
         if (text.includes("晴") && isDay) {
