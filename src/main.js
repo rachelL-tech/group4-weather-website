@@ -30,6 +30,20 @@ if (homePageBtn) {
   });
 }
 
+function bindButtonSpin() {
+  // focus button popover toggle 時加 is-open ，讓他旋轉（寫在is-open）
+  const btn = document.querySelector("#location-popover__trigger");
+  const pop = document.querySelector("#location-popover");
+
+  if (!btn && !pop) return;
+
+  // Popover API：會在開/關時觸發 toggle event
+  pop.addEventListener("toggle", (e) => {
+    // e.newState: "open" | "closed"
+    btn.classList.toggle("is-open", e.newState === "open");
+  });
+}
+
 async function renderData(city) {
   const CurrentWeather_Data = await getNow10MinRenderData(city);
   renderCurrentWeather(CurrentWeather_Data);
@@ -60,6 +74,8 @@ function init() {
   });
 
   initLocationDropdown();
+
+  bindButtonSpin();
   
   setupGeoButton({
       onSuccess: async ({ lat, lon }) => {
