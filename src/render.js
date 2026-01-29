@@ -183,4 +183,29 @@ export function renderCurrentWeather(data){
   console.log(weatherText)
 
   WeatherManager.update(weatherText);
+
+  const testData = {
+    StationName: "基隆",
+    Weather: "陰有雨",
+    AirTemperature: 15.5,
+    RelativeHumidity: 83,
+    UVIndex: 0,
+  }
+  renderLocationPopup(testData)
+}
+
+// renderLocationPopup
+export function renderLocationPopup(data){
+  const popUp = document.querySelector(".location-popup__container")
+  if (!popUp) return
+  popUp.innerHTML = `<h4>📍 即時位置資訊</h4>
+      <p>離您最近的觀測站是：
+        <span class="location-popup__staion-name">${data.StationName}</span>
+      </p>
+      <ul class="location-popup__info">
+        <li>🌦️ 天氣狀況｜${data.Weather}</li>
+        <li>🌡️ 目前溫度｜${data.AirTemperature}</li>
+        <li>💧 相對濕度｜${data.RelativeHumidity}%</li>
+        <li>☀️ 紫外線指數｜${data.UVIndex}</li>
+      </ul>`
 }

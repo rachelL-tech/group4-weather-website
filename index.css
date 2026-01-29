@@ -25,6 +25,7 @@
   font-size: 120px;
   font-weight: 400;
   color: var(--text-main);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2)); 
 }
 
 .current-weather__icon {

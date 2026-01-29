@@ -143,5 +143,59 @@ body {
 
 /* 晚上：深邃的夜空藍 */
 .state-night {
-    background: linear-gradient(135deg, #0f2027 0%, #182c33 70%, #244250 100%);
+    background: linear-gradient(155deg, #081115 0%, #101c21 80%, #1b323c 100%);
 }
+
+/*! 做給瑞秋的popover */
+
+.location-popup__container {
+    /* 用 anchor定位 user-profile 按鈕 */
+    inset: unset;
+    top: anchor(bottom);
+    left: anchor(center);
+    transform: translateX(-50%);
+        /* 水平居中對齊 */
+    margin-top: 20px;
+
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 100;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.location-popup__container h4 {
+    margin-bottom: 10px;
+    font-size: 16px;
+    letter-spacing: 0.1rem;
+}
+
+.location-popup__container p {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.location-popup__info {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.location-popup__container li {
+    list-style: none;
+    direction: none;
+    color: white;
+    padding: 5px 5px;
+    font-size: 12px;
+    letter-spacing: 0.1rem;
+}
+
+
+.location-popup__container hr {
+    margin: 10px 0;
+    color: rgba(255, 255, 255, 0.662);
+}
+
