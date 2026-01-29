@@ -1,5 +1,5 @@
 // 引入渲染工具
-import { renderHourlyForecast, renderDailySummary,renderForecast,renderCurrentWeather } from './render.js';
+import { renderHourlyForecast, renderDailySummary,renderForecast,renderCurrentWeather, renderLocationPopup } from './render.js';
 import { getCard1RenderData, getCard2RenderData, getNow10MinRenderData,getForecastRenderData, get10MinLatLonCounty } from './api.js';
 import { initLocationDropdown, setupGeoButton, findNearestStation } from './location.js';
 
@@ -19,8 +19,6 @@ if (homePageBtn) {
   });
 }
 
-// const now_Data = await getNow10MinRenderData("臺北市");
-
 async function renderData(city = "臺北市") {
   const CurrentWeather_Data = await getNow10MinRenderData(city);
   console.log(CurrentWeather_Data);
@@ -37,37 +35,26 @@ async function renderData(city = "臺北市") {
   renderForecast(forecast_Data);
 }
 
-// function init() {
-//   renderData();
+function init() {
+  renderData();
 
-//   // 監聽使用者點擊選單
-//   document.addEventListener("citychange", async (e) => {
-//     const city = e.detail.city;
-//     renderData(city);
-//   });
+  // 監聽使用者點擊選單
+  document.addEventListener("citychange", async (e) => {
+    const city = e.detail.city;
+    renderData(city);
+  });
 
-//   initLocationDropdown();
+  initLocationDropdown();
   
-//   setupGeoButton({
-//       onSuccess: async ({ lat, lon }) => {
-//       const stations = await get10MinLatLonCounty(); // 回傳 [{lat, lon, ...}, ...]
-//       const nearestStationData = findNearestStation({ lat, lon }, stations);
-//       console.log("最近測站資料：", nearestStationData);
-      
-//       // render(nearestStationData);
-//     },
-//   });
-// }
-
-// init();
-
-initLocationDropdown();
-setupGeoButton({
+  setupGeoButton({
       onSuccess: async ({ lat, lon }) => {
       const stations = await get10MinLatLonCounty();
       const nearestStationData = findNearestStation({ lat, lon }, stations);
       console.log("最近測站資料：", nearestStationData);
       
-      // render(nearestStationData);
+      renderLocationPopup(nearestStationData);
     },
   });
+}
+
+init();

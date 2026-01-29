@@ -77,7 +77,7 @@
                 <a href="#" class="dropdown-item" data-location="金門縣">金門縣</a>
               </div>
             </div>
-            <button class="focus"></button>
+            <button class="focus" popovertarget="location-popover" id="location-popover__trigger"></button>
           </div>
 
         </section>
@@ -122,6 +122,15 @@
         </section>
       </main>
     </div>
-    <div id="background-placeholder"></div>
+    <div class="location-popup__container" id="location-popover" anchor="location-popover__trigger" popover>
+      <!-- <h4>📍 即時位置資訊</h4>
+      <p>離您最近的觀測站是：<span class="location-popup__staion-name">陽明山</span></p>
+      <ul class="location-popup__info">
+        <li>🌦️ 天氣狀況｜</li>
+        <li>🌡️ 目前溫度｜</li>
+        <li>💧 相對濕度｜</li>
+        <li>☀️ 紫外線指數｜</li>
+      </ul> -->
+    </div>
   </body>
 </html>
