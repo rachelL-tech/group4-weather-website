@@ -1,5 +1,5 @@
 // 引入渲染工具
-import { renderHourlyForecast, renderDailySummary,renderForecast,renderCurrentWeather } from './render.js';
+import { renderHourlyForecast, renderDailySummary,renderForecast,renderCurrentWeather, renderLocationPopup } from './render.js';
 import { getCard1RenderData, getCard2RenderData, getNow10MinRenderData,getForecastRenderData, get10MinLatLonCounty } from './api.js';
 import { initLocationDropdown, setupGeoButton, findNearestStation } from './location.js';
 
@@ -52,7 +52,7 @@ function init() {
       const nearestStationData = findNearestStation({ lat, lon }, stations);
       console.log("最近測站資料：", nearestStationData);
       
-      // render(nearestStationData);
+      renderLocationPopup(nearestStationData);
     },
   });
 }
