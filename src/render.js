@@ -159,7 +159,7 @@ export function renderForecast(data,selector = '.forecast-list'){
 
           <div class="weather-metric">
             <div class="weather-metric__label label-text">風速</div>
-            <div class="weather-metric__value value-text">${wind}</div>
+            <div class="weather-metric__value value-text">${wind}m/s</div>
           </div>
 
         </div>
