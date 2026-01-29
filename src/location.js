@@ -5,8 +5,9 @@ export function initLocationDropdown() {
     const button = dropdown.querySelector(".dropdown-toggle.current-weather__location");
     if (!button) return;
 
-    // 初始 city：預設按鈕上的文字
-    let city = (button.textContent || "").trim() || "臺北市";
+    // 初始 city
+    let city = "臺北市";
+
     window.city = city;
 
     // 只在「不能 hover 的裝置」才用 click toggle，避免桌機 hover + click 狀態打架

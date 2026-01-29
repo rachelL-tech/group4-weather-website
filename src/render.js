@@ -104,12 +104,16 @@ export function renderDailySummary(data) {
 
 export function renderForecast(data,selector = '.forecast-list'){
   const container = document.querySelector(selector);
+  const subtitle = document.querySelector(".subtitle");
   if (!container) return;
 
   if(!data || !data.renderData){
     container.innerHTML = '<div class = "error">暫無預報資料</div>';
     return
   } 
+
+  subtitle.textContent = data.renderData[city];
+
   const forecastList = Object.entries(data.renderData);
 
   let html = '';
@@ -183,15 +187,6 @@ export function renderCurrentWeather(data){
   console.log(weatherText)
 
   WeatherManager.update(weatherText);
-
-  const testData = {
-    StationName: "基隆",
-    Weather: "陰有雨",
-    AirTemperature: 15.5,
-    RelativeHumidity: 83,
-    UVIndex: 0,
-  }
-  renderLocationPopup(testData)
 }
 
 // renderLocationPopup
