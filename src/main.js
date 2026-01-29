@@ -7,25 +7,34 @@ import { initLocationDropdown, setupGeoButton, findNearestStation } from './loca
 const homePageBtn = document.getElementById('homePageBtn');
 const forecastPageBtn = document.getElementById('forecastPageBtn');
 
+function goTo(page) {
+  const url = new URL(page, window.location.origin);
+  url.searchParams.set("city", window.city);
+  window.location.href = url.toString();
+}
+
+function getCityFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("city");
+}
+
 if (forecastPageBtn) {
   forecastPageBtn.addEventListener('click', () => {
-    window.location.href = 'forecast.html';
+    goTo("forecast.html");
   });
 }
 
 if (homePageBtn) {
   homePageBtn.addEventListener('click', () => {
-    window.location.href = 'index.html';
+    goTo("index.html");
   });
 }
 
-async function renderData(city = "臺北市") {
+async function renderData(city) {
   const CurrentWeather_Data = await getNow10MinRenderData(city);
-  console.log(CurrentWeather_Data);
   renderCurrentWeather(CurrentWeather_Data);
 
   const card1_Data = await getCard1RenderData(city);
-  console.log(card1_Data);
   renderHourlyForecast(card1_Data);
 
   const card2_Data = await getCard2RenderData(city);
@@ -33,10 +42,16 @@ async function renderData(city = "臺北市") {
 
   const forecast_Data = await getForecastRenderData(city);
   renderForecast(forecast_Data);
+  // 如果是在預測頁面，另外渲染背景
+  if (document.querySelector(".screen.forecast")){
+    console.log("目前背景天氣", CurrentWeather_Data.UIData?.Weather)
+    WeatherManager.update(CurrentWeather_Data.UIData?.Weather);
+  }
 }
 
 function init() {
-  renderData();
+  window.city = getCityFromUrl() || "臺北市";
+  renderData(window.city);
 
   // 監聽使用者點擊選單
   document.addEventListener("citychange", async (e) => {
