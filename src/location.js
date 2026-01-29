@@ -69,3 +69,17 @@ export function initLocationDropdown() {
 }
 
 // focus button fuction to get realtime nearest weather data
+// export function setupGeoButton({
+//   buttonSelector = ".location_container .focus",
+//   onSuccess,
+// } = {}) {
+//   const btn = document.querySelector(buttonSelector);
+//   if (!btn) return;
+
+//   btn.addEventListener("click", () => {
+//     navigator.geolocation.getCurrentPosition((pos) => {
+//       const { latitude, longitude } = pos.coords;
+//       onSuccess?.({ lat: latitude, lon: longitude });
+//     });
+//   });
+// }
