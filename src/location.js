@@ -67,3 +67,5 @@ export function initLocationDropdown() {
         });
     });
 }
+
+// focus button fuction to get realtime nearest weather data
