@@ -132,7 +132,7 @@
   height: 50px ;
   border: none;
   background: transparent;
-  background-image: url("/design/icons/focus.png");
+  background-image: url("./design/icons/focus.png");
   background-size: cover; /* 按比例放大並裁切圖片以填滿容器 */
   background-position: center top; /* 以中央對齊裁切 */
   cursor: pointer;
