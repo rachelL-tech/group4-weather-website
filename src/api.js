@@ -216,7 +216,7 @@ function pickForecastLocation(raw, city) {
 // ==============================
 export async function getForecastRenderData(city) {
   try {
-    const raw = await fetchCWA("F-D0047-091", { locationName: city });
+    const raw = await fetchCWA("F-D0047-091", { LocationName: city });
 
     // ✅ 091 實際路徑：records.Locations[0].Location
     const loc =
@@ -301,6 +301,7 @@ export async function getForecastRenderData(city) {
       ];
     }
 
+    renderData[city] = city;
     return ok(renderData);
   } catch (e) {
     console.error("forecast error:", e);
