@@ -118,7 +118,11 @@ const particlesOptions = {
                         { src: "./design/background/cloud1.png", width: 100, height: 100 },
                         { src: "./design/background/cloud2.png", width: 100, height: 100 },
                         { src: "./design/background/cloud3.png", width: 100, height: 100 },
+<<<<<<< HEAD
                         // { src: "/design/background/cloud4.png", width: 100, height: 100 }
+=======
+                        // { src: "./design/background/cloud4.png", width: 100, height: 100 }
+>>>>>>> develop
                     ]
                 }
             },

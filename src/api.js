@@ -83,16 +83,13 @@ function safeNum(v) {
   return Number.isFinite(n) ? n : null;
 }
 
-export async function getCard2RenderData(city = "臺北市") {
+export async function getCard2RenderData(city) {
   try {
     const raw = await fetchCWA("F-C0032-001", { locationName: city });
 
     const loc = raw?.records?.location?.find(l => l.locationName === city) 
          ?? raw?.records?.location?.[0];
     const we = loc?.weatherElement ?? [];
-
-    console.log("elementName list:", we.map(e => e.elementName));
-    console.log("Wx time[0] sample:", we.find(e => e.elementName === "Wx")?.time?.[0]);
 
     const wxEl = findEl(we, "Wx");
     const popEl = findEl(we, "PoP");
@@ -217,7 +214,7 @@ function pickForecastLocation(raw, city) {
 // ==============================
 // 主函式：7 日預報
 // ==============================
-export async function getForecastRenderData(city = "臺北市") {
+export async function getForecastRenderData(city) {
   try {
     const raw = await fetchCWA("F-D0047-091", { locationName: city });
 
@@ -355,7 +352,7 @@ async function getNowTempByCity(city) {
 // ==============================
 // card 1 主函式
 // ==============================
-export async function getCard1RenderData(city = "臺北市") {
+export async function getCard1RenderData(city) {
   try {
     const raw = await fetchCWA("F-D0047-089", { locationName: city });
 
@@ -450,7 +447,7 @@ export async function getCard1RenderData(city = "臺北市") {
 // 10 分鐘觀測（O-A0003-001）
 // 回傳原始 weather 字串（不轉 icon）
 // ==============================
-export async function getNow10MinRenderData(city = "臺北市") {
+export async function getNow10MinRenderData(city) {
   try {
     const stationId = CITY_TO_STATION[city];
     if (!stationId) throw new Error("No station mapping");
@@ -475,6 +472,63 @@ export async function getNow10MinRenderData(city = "臺北市") {
       }
     };
   } catch (err) {
+    return {
+      ok: false,
+      error: {
+        message: "無法連線到氣象資料服務，請稍後再試。"
+      }
+    };
+  }
+}
+
+function getWGS84(geo) {
+  const coords = geo?.Coordinates ?? [];
+  const wgs = coords.find(
+    c => c?.CoordinateName === "WGS84"
+  );
+  return {
+    lat: safeNumObs(wgs?.StationLatitude),
+    lon: safeNumObs(wgs?.StationLongitude),
+  };
+}
+
+export async function get10MinLatLonCounty() {
+  try {
+    const raw = await fetchCWA("O-A0003-001");
+    const stations = raw?.records?.Station ?? [];
+
+    const data = stations
+      .map(st => {
+        const stationName = st?.StationName;
+        const stationId = st?.StationId;
+        const geo = st?.GeoInfo ?? {};
+        const { lat, lon } = getWGS84(geo);
+
+        const county = geo?.CountyName ?? "";
+        const T = safeNumObs(st?.WeatherElement?.AirTemperature);
+        const Weather = st.WeatherElement.Weather;
+        const RelativeHumidity = st.WeatherElement.RelativeHumidity;
+        const UVIndex = st.WeatherElement.UVIndex;
+
+
+        if (lat == null || lon == null) return null;
+
+        return {
+          stationName,
+          stationId,
+          lat,
+          lon,
+          county,
+          T: T != null ? String(Math.round(T)) : "--",
+          Weather,
+          RelativeHumidity,
+          UVIndex
+        };
+      })
+      .filter(Boolean);
+
+    return data;
+  } catch (e) {
     return {
       ok: false,
       error: {
