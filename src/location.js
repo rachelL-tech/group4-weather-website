@@ -18,7 +18,7 @@ export function initLocationDropdown() {
         dropdown.classList.toggle("active");
         });
     }
-    
+
     // 點按鈕：開/關選單（看你 CSS 是否用 .active 控制）
     button.addEventListener("click", (e) => {
         e.preventDefault();
@@ -106,3 +106,13 @@ export function findNearestStation(user, stations) {
   }
   return best;
 }
+
+// focus button popover toggle 時加 is-open ，讓他旋轉（寫在is-open）
+const btn = document.querySelector("#location-popover__trigger");
+const pop = document.querySelector("#location-popover"); // 你的 popover 元素 id
+
+// Popover API：會在開/關時觸發 toggle event
+pop.addEventListener("toggle", (e) => {
+  // e.newState: "open" | "closed"
+  btn.classList.toggle("is-open", e.newState === "open");
+});
