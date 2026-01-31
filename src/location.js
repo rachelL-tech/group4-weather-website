@@ -1,14 +1,53 @@
 // dropdown menu function
-export function initLocationDropdown() {
+export function initLocationDropdown(city) {
     const dropdown = document.querySelector(".dropdown");
     if (!dropdown) return;
     const button = dropdown.querySelector(".dropdown-toggle.current-weather__location");
     if (!button) return;
 
-    // 初始 city
-    let city = "臺北市";
+    const menu = dropdown.querySelector(".dropdown-menu");
 
-    window.city = city;
+    const currentCity = city;
+    const prevCity = button.textContent;
+
+    if (currentCity && currentCity !== prevCity) {
+        let matchedItem = null;
+        dropdown.querySelectorAll(".dropdown-item").forEach((item) => {
+            const itemCity = item.dataset.location || item.textContent;
+            if (itemCity === currentCity) matchedItem = item;
+        });
+
+        if (matchedItem) {
+            button.textContent = currentCity;
+            matchedItem.textContent = prevCity;
+            matchedItem.dataset.location = prevCity;
+        } else {
+            button.textContent = currentCity;
+
+            // 移除清單中與 currentCity 相同的項目，避免重複
+            dropdown.querySelectorAll(".dropdown-item").forEach((item) => {
+                const itemCity = item.dataset.location || item.textContent;
+                if (itemCity === currentCity) item.remove();
+            });
+
+            // 確保 prevCity 在清單內，方便之後 swap
+            if (prevCity) {
+                const hasPrev = Array.from(dropdown.querySelectorAll(".dropdown-item")).some(
+                    (item) => normalizeCity(item.dataset.location || item.textContent) === prevCity
+                );
+                if (!hasPrev) {
+                    const item = document.createElement("a");
+                    item.href = "#";
+                    item.className = "dropdown-item";
+                    item.dataset.location = prevCity;
+                    item.textContent = prevCity;
+                    menu.appendChild(item);
+                }
+            }
+        }
+    } else if (currentCity) {
+        button.textContent = currentCity;
+    }
 
     // 只在「不能 hover 的裝置」才用 click toggle，避免桌機 hover + click 狀態打架
     const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
@@ -19,7 +58,7 @@ export function initLocationDropdown() {
         });
     }
 
-    // 點按鈕：開/關選單（看你 CSS 是否用 .active 控制）
+    // 點按鈕：開/關選單
     button.addEventListener("click", (e) => {
         e.preventDefault();
         dropdown.classList.toggle("active");
@@ -42,11 +81,10 @@ export function initLocationDropdown() {
             this.dataset.location = prevCity;
 
             // 3) 存 city
-            city = nextCity;
-            window.city = city;
+            window.city = nextCity;
 
             // 4) 通知其他檔案（例如 api.js / main.js）去抓資料並渲染
-            document.dispatchEvent(new CustomEvent("citychange", { detail: { city } }));
+            document.dispatchEvent(new CustomEvent("citychange", { detail: { city: window.city } }));
 
             // 5) 視覺回饋 + 關閉選單
             dropdown.classList.remove("active");

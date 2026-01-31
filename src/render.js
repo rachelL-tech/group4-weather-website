@@ -6,16 +6,6 @@ export function renderHourlyForecast(hoursData, selector = '.hourly-forecast') {
 
   if (!container) return;
 
-  // 假資料 (以後從 API 抓)
-  // hoursData = [
-  //   { time: '現在', temp: '23°C', type: 'rainy' },
-  //   { time: '00', temp: '21°C', type: 'rainy' },
-  //   { time: '01', temp: '20°C', type: 'thunder' },
-  //   { time: '02', temp: '20°C', type: 'cloudy' },
-  //   { time: '03', temp: '23°C', type: 'sunny' },
-  //   { time: '04', temp: '26°C', type: 'sunny' },
-  // ];
-
   let html = '';
 
   // 呼叫 getIcon(item.type) 拿到 SVG 字串
@@ -82,30 +72,7 @@ export function renderDailySummary(data) {
   barEl.style.width = barWidth + '%';
 }
 
-// // 假資料 (以後從 API 抓)
-// const fakeData = {
-//   ok: true,
-//   renderData: {
-//     minT: 18,
-//     maxT: 32,
-//     barLeft: '25', // 模擬算出 25%
-//     barWidth: '40', // 模擬算出 40%
-//     weather: '雷陣雨',
-//     comfortIndex: '悶熱',
-//     chanceOfRain: 60,
-//   },
-// };
-
-// // 假資料 (以後從 API 抓)
-// const fakeErrorData = {
-//   ok: false,
-//   error: {
-//     message: '無法連線到氣象資料服務，請稍後再試。',
-//   },
-// };
-
 // renderForecast
-
 export function renderForecast(data,selector = '.forecast-list'){
   console.log(data)
   const container = document.querySelector(selector);
