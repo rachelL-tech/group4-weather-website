@@ -6,9 +6,10 @@ export function initLocationDropdown(city) {
     if (!button) return;
 
     const menu = dropdown.querySelector(".dropdown-menu");
+    const normalizeCity = (value) => (value || "").trim();
 
-    const currentCity = city;
-    const prevCity = button.textContent;
+    const currentCity = window.city;
+    const prevCity = normalizeCity(button.textContent);
 
     if (currentCity && currentCity !== prevCity) {
         let matchedItem = null;
